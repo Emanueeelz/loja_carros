@@ -1,10 +1,13 @@
 package br.org.edu.ifrn.carros.controllers;
+
+import br.org.edu.ifrn.carros.dto.CadastroUsuarioRequest;
 import br.org.edu.ifrn.carros.dto.UsuarioRequest;
 import br.org.edu.ifrn.carros.model.Usuario;
 import br.org.edu.ifrn.carros.services.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.net.URI;
 import java.util.List;
 
@@ -12,19 +15,33 @@ import java.util.List;
 @RequestMapping("/usuarios")
 public class UsuarioController {
     private final UsuarioService service;
-    public UsuarioController(UsuarioService service) { this.service = service; }
+    public UsuarioController(UsuarioService service) {
+        this.service = service;
+    }
 
     @GetMapping
-    public List<Usuario> listar() { return service.listar(); }
+    public List<Usuario> listar() {
+        return service.listar();
+    }
     @GetMapping("/{id}")
-    public Usuario buscar(@PathVariable Long id) { return service.buscar(id); }
+    public Usuario buscar(@PathVariable Long id) {
+        return service.buscar(id);
+    }
     @PostMapping
-    public ResponseEntity<Usuario> criar(@Valid @RequestBody UsuarioRequest request) {
-        Usuario salvo = service.criar(request);
-        return ResponseEntity.created(URI.create("/usuarios/" + salvo.getId())).body(salvo);
+    public ResponseEntity<Usuario> criar(
+            @Valid @RequestBody CadastroUsuarioRequest request
+    ) {
+        Usuario usuario = service.criar(request);
+
+        return ResponseEntity
+                .created(URI.create("/usuarios/" + usuario.getId()))
+                .body(usuario);
     }
     @PutMapping("/{id}")
-    public Usuario atualizar(@PathVariable Long id, @Valid @RequestBody UsuarioRequest request) {
+    public Usuario atualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody UsuarioRequest request
+    ) {
         return service.atualizar(id, request);
     }
     @DeleteMapping("/{id}")
