@@ -1,3 +1,4 @@
+
 package br.org.edu.ifrn.carros.config;
 
 import jakarta.servlet.DispatcherType;
@@ -29,27 +30,66 @@ public class SecurityConfig {
                 return List.of();
             }
 
-            return List.of(new SimpleGrantedAuthority("ROLE_" + perfil));
+            return List.of(
+                    new SimpleGrantedAuthority("ROLE_" + perfil)
+            );
         });
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
+
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
+
                 .authorizeHttpRequests(auth -> auth
-                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+
+                        // Tratamento de erros
+                        .dispatcherTypeMatchers(
+                                DispatcherType.ERROR
+                        ).permitAll()
+
                         .requestMatchers("/error").permitAll()
 
-                        .requestMatchers(HttpMethod.POST,
-                                "/auth/login", "/usuarios").permitAll()
+                        // Páginas públicas do frontend
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/",
+                                "/index.html",
+                                "/detalhes.html",
+                                "/login.html",
+                                "/cadastro.html",
+                                "/admin.html",
+                                "/css/**",
+                                "/js/**"
+                        ).permitAll()
 
-                        .requestMatchers(HttpMethod.GET,
-                                "/carros", "/carros/*", "/carros/*/foto").permitAll()
+                        // Cadastro de usuários e login
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/auth/login",
+                                "/usuarios"
+                        ).permitAll()
 
-                        .requestMatchers("/test-drives/**").denyAll()
+                        // Consulta pública de veículos
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/carros",
+                                "/carros/*",
+                                "/carros/*/foto"
+                        ).permitAll()
 
+                        // Test-drives bloqueados
+                        .requestMatchers(
+                                "/test-drives/**"
+                        ).denyAll()
+
+                        // Funcionalidades exclusivas do administrador
                         .requestMatchers(
                                 "/carros/**",
                                 "/usuarios/**",
@@ -58,11 +98,17 @@ public class SecurityConfig {
                                 "/adm/**"
                         ).hasRole("ADMIN")
 
+                        // Bloqueia outras requisições
                         .anyRequest().denyAll()
                 )
+
+                // Autenticação via JWT
                 .oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(jwt ->
-                                jwt.jwtAuthenticationConverter(converter)))
+                                jwt.jwtAuthenticationConverter(converter)
+                        )
+                )
+
                 .build();
     }
 }

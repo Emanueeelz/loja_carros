@@ -1,0 +1,132 @@
+/* páginas de autenticação */
+
+.auth-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 75vh;
+    padding-top: 70px;
+    padding-bottom: 90px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 460px;
+    padding: 40px;
+    background: #1b2026;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+}
+
+.auth-card h1 {
+    font-size: 32px;
+    line-height: 1.2;
+    margin-bottom: 12px;
+}
+
+.auth-descricao {
+    color: #aeb2b8;
+    font-size: 15px;
+    margin-bottom: 30px;
+}
+
+/* formulários */
+
+.auth-card form {
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-card label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.auth-card input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 20px;
+    background: #101317;
+    border: 1px solid #30363d;
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.auth-card input::placeholder {
+    color: #818891;
+}
+
+.auth-card input:focus {
+    outline: none;
+    border-color: #d6aa65;
+}
+
+.auth-botao {
+    width: 100%;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.auth-botao:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+/* mensagens */
+
+.mensagem-auth {
+    font-size: 14px;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.mensagem-auth:empty {
+    display: none;
+}
+
+.mensagem-auth.erro {
+    color: #ff9999;
+}
+
+.mensagem-auth.sucesso {
+    color: #9bdcb4;
+}
+
+/* links */
+
+.auth-rodape {
+    margin-top: 25px;
+    text-align: center;
+    color: #aeb2b8;
+    font-size: 14px;
+}
+
+.auth-rodape a {
+    color: #d6aa65;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.auth-rodape a:hover {
+    text-decoration: underline;
+}
+
+/* celulares */
+
+@media (max-width: 600px) {
+    .auth-area {
+        padding-top: 45px;
+        padding-bottom: 60px;
+    }
+
+    .auth-card {
+        padding: 28px 22px;
+    }
+
+    .auth-card h1 {
+        font-size: 27px;
+    }
+}

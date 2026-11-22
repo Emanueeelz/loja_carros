@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Criar conta | GARAGEM</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+
+<header>
+    <nav class="container">
+        <a href="/" class="logo">GARAGEM<span>.</span></a>
+        <a href="/#catalogo" class="menu-link">Ver veículos</a>
+    </nav>
+</header>
+
+<main class="container auth-area">
+    <section class="auth-card">
+        <p class="destaque">FAÇA PARTE DA GARAGEM</p>
+        <h1>Crie sua conta</h1>
+
+        <p class="auth-descricao">
+            Cadastre-se para acessar sua conta.
+        </p>
+
+        <form id="form-cadastro">
+            <label for="nome">Nome completo</label>
+            <input
+                    type="text"
+                    id="nome"
+                    placeholder="Seu nome"
+                    autocomplete="name"
+                    maxlength="120"
+                    required
+            >
+
+            <label for="email">E-mail</label>
+            <input
+                    type="email"
+                    id="email"
+                    placeholder="seu@email.com"
+                    autocomplete="email"
+                    maxlength="180"
+                    required
+            >
+
+            <label for="senha">Senha</label>
+            <input
+                    type="password"
+                    id="senha"
+                    placeholder="Mínimo de 8 caracteres"
+                    autocomplete="new-password"
+                    minlength="8"
+                    maxlength="72"
+                    required
+            >
+
+            <label for="confirmar-senha">Confirmar senha</label>
+            <input
+                    type="password"
+                    id="confirmar-senha"
+                    placeholder="Digite a senha novamente"
+                    autocomplete="new-password"
+                    minlength="8"
+                    maxlength="72"
+                    required
+            >
+
+            <button type="submit" class="botao auth-botao">
+                Criar conta
+            </button>
+
+            <p id="mensagem-auth" class="mensagem-auth"
+               role="status" aria-live="polite"></p>
+        </form>
+
+        <p class="auth-rodape">
+            Já possui uma conta?
+            <a href="/login.html">Entrar</a>
+        </p>
+    </section>
+</main>
+
+<footer>
+    <div class="container">
+        <p>GARAGEM — Loja de Veículos</p>
+        <p>Encontre seu próximo carro.</p>
+    </div>
+</footer>
+
+<script src="/js/auth.js"></script>
+
+</body>
+</html>

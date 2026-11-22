@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>GARAGEM | Loja de Veículos</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header>
+    <nav class="container">
+        <a href="/" class="logo">GARAGEM<span>.</span></a>
+
+        <div class="nav-acoes">
+            <a href="#catalogo" class="menu-link">
+                Ver veículos
+            </a>
+
+            <a href="/login.html"
+               class="menu-link"
+               id="link-entrar">
+                Entrar
+            </a>
+
+            <a href="/cadastro.html"
+               class="menu-link"
+               id="link-cadastro">
+                Criar conta
+            </a>
+
+            <a href="/admin.html"
+               class="menu-link"
+               id="link-admin"
+               hidden>
+                Painel
+            </a>
+
+            <button type="button" id="botao-sair" hidden>
+                Sair
+            </button>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section class="hero">
+        <div class="container">
+            <p class="destaque">SUA PRÓXIMA CONQUISTA</p>
+
+            <h1>Encontre o carro que combina com você.</h1>
+
+            <p class="descricao">
+                Explore nossa seleção de veículos e encontre
+                o modelo ideal para sua próxima jornada.
+            </p>
+
+            <a href="#catalogo" class="botao">
+                Explorar veículos
+            </a>
+        </div>
+    </section>
+
+    <section class="catalogo container" id="catalogo">
+        <div class="catalogo-topo">
+            <div>
+                <p class="destaque">NOSSA SELEÇÃO</p>
+                <h2>Veículos disponíveis</h2>
+            </div>
+
+            <p class="catalogo-descricao">
+                Conheça os veículos disponíveis em nossa loja.
+            </p>
+        </div>
+
+        <!-- Filtros de pesquisa -->
+        <form id="filtros">
+            <input
+                    type="text"
+                    id="marca"
+                    placeholder="Marca"
+                    aria-label="Marca"
+            >
+
+            <input
+                    type="text"
+                    id="modelo"
+                    placeholder="Modelo"
+                    aria-label="Modelo"
+            >
+
+            <input
+                    type="number"
+                    id="precoMax"
+                    placeholder="Preço máximo"
+                    aria-label="Preço máximo"
+                    min="0"
+                    step="0.01"
+            >
+
+            <button type="submit" class="botao-buscar">
+                Buscar veículos
+            </button>
+
+            <button type="button" id="limpar-filtros">
+                Limpar
+            </button>
+        </form>
+
+        <!-- Catálogo de veículos -->
+        <div id="lista-carros">
+            <p>Carregando veículos...</p>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="container">
+        <p>GARAGEM — Loja de Veículos</p>
+        <p>Encontre seu próximo carro.</p>
+    </div>
+</footer>
+
+<!-- JavaScript do catálogo -->
+<script src="/js/catalogo.js"></script>
+
+<!-- JavaScript da autenticação -->
+<script src="/js/auth.js"></script>
+
+</body>
+</html>
