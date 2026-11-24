@@ -1,352 +1,394 @@
 const tokenAdmin = sessionStorage.getItem("garagem_token");
-
 const painel = document.getElementById("painel-admin");
 const aviso = document.getElementById("aviso-acesso");
 const mensagem = document.getElementById("mensagem-admin");
-const formulario = document.getElementById("form-carro");
+const mensagemForm = document.getElementById("mensagem-form");
 const lista = document.getElementById("lista-admin");
+const formulario = document.getElementById("form-carro");
+const modal = document.getElementById("modal-carro");
+const salvar = document.getElementById("salvar-carro");
+const miniaturas = document.getElementById("lista-fotos-modal");
 
 let carrosAdmin = [];
 let idEmEdicao = null;
+let galeria = [];
+let galeriaAlterada = false;
+let versaoModal = 0;
+const capasCards = new Set();
 
-// Verifica o perfil informado no token.
-// A autorização real continua sendo feita pelo backend.
 function possuiPerfilAdmin(token) {
     if (!token) return false;
-
     try {
-        const parte = token.split(".")[1]
-            .replace(/-/g, "+")
-            .replace(/_/g, "/");
-
-        const dados = JSON.parse(atob(parte));
-
-        return dados.perfil === "ADMIN" &&
-            dados.exp > Date.now() / 1000;
-
-    } catch (erro) {
+        const dados = JSON.parse(atob(token.split(".")[1]
+            .replace(/-/g, "+").replace(/_/g, "/")));
+        return dados.perfil === "ADMIN" && dados.exp > Date.now() / 1000;
+    } catch {
         return false;
     }
 }
 
-// Mensagens do painel
-function mostrarMensagemAdmin(texto, tipo = "erro") {
-    mensagem.textContent = texto;
-    mensagem.className = `mensagem-admin ${tipo}`;
+function mostrarMensagem(texto, tipo = "erro", destino = mensagem) {
+    destino.textContent = texto;
+    destino.className = `mensagem-admin ${tipo}`;
 }
 
-// Requisições autenticadas
 async function requisitar(url, opcoes = {}) {
     const resposta = await fetch(url, {
         ...opcoes,
-        headers: {
-            Authorization: `Bearer ${tokenAdmin}`,
-            ...opcoes.headers
-        }
+        headers: { Authorization: `Bearer ${tokenAdmin}`, ...opcoes.headers }
     });
-
     if (resposta.status === 401) {
         sessionStorage.removeItem("garagem_token");
-        throw new Error("Sessão expirada. Faça login novamente.");
+        throw new Error("Sessão expirada. Entre novamente.");
     }
-
     if (resposta.status === 403) {
         throw new Error("Sua conta não tem permissão de administrador.");
     }
-
-    if (resposta.status === 400) {
-        throw new Error("Verifique os dados e a fotografia informados.");
+    if (resposta.status === 413) {
+        throw new Error("Fotografias grandes demais. Máximo de 5 MB por foto.");
     }
-
+    if (resposta.status === 400) {
+        throw new Error("Confira os dados e a quantidade de fotografias.");
+    }
     if (!resposta.ok) {
         throw new Error(`Não foi possível concluir a operação (${resposta.status}).`);
     }
-
-    return resposta.status === 204
-        ? null
-        : resposta.json();
+    if (resposta.status === 204) return null;
+    return resposta.json();
 }
 
-// Obtém os dados do formulário
-function obterDadosFormulario() {
-    const campos = formulario.elements;
-
-    return {
-        marca: campos.marca.value.trim(),
-        modelo: campos.modelo.value.trim(),
-        anoFabricacao: Number(campos.anoFabricacao.value),
-        anoModelo: Number(campos.anoModelo.value),
-        cor: campos.cor.value.trim(),
-        quilometragem: Number(campos.quilometragem.value),
-        combustivel: campos.combustivel.value.trim(),
-        transmissao: campos.transmissao.value.trim(),
-        preco: campos.preco.value,
-        descricao: campos.descricao.value.trim(),
-        situacao: campos.situacao.value
-    };
+// A rota /adm/ permite consultar as fotos também de carros inativos.
+async function carregarArquivoFoto(id, indice) {
+    const resposta = await fetch(`/adm/carros/${id}/fotos/${indice}`, {
+        headers: { Authorization: `Bearer ${tokenAdmin}` }
+    });
+    if (!resposta.ok) throw new Error("Não foi possível carregar uma fotografia.");
+    const blob = await resposta.blob();
+    const tipo = blob.type || "image/jpeg";
+    const extensao = tipo.includes("png") ? "png" : tipo.includes("webp") ? "webp" : "jpg";
+    return new File([blob], `foto-${indice}.${extensao}`, { type: tipo });
 }
 
-// Retorna o formulário ao modo de cadastro
-function limparFormulario() {
-    formulario.reset();
-    idEmEdicao = null;
-
-    formulario.elements.foto.required = true;
-
-    document.getElementById("titulo-form").textContent =
-        "Cadastrar veículo";
-
-    document.getElementById("salvar-carro").textContent =
-        "Cadastrar veículo";
-
-    document.getElementById("cancelar-edicao").hidden = true;
+function liberarCapas() {
+    capasCards.forEach(url => URL.revokeObjectURL(url));
+    capasCards.clear();
 }
 
-// Preenche o formulário para editar um veículo
-function editarCarro(carro) {
-    idEmEdicao = carro.id;
+function liberarGaleria() {
+    galeria.forEach(item => URL.revokeObjectURL(item.url));
+    galeria = [];
+}
 
-    const campos = formulario.elements;
-
-    campos.marca.value = carro.marca;
-    campos.modelo.value = carro.modelo;
-    campos.anoFabricacao.value = carro.anoFabricacao;
-    campos.anoModelo.value = carro.anoModelo;
-    campos.cor.value = carro.cor;
-    campos.quilometragem.value = carro.quilometragem;
-    campos.combustivel.value = carro.combustivel;
-    campos.transmissao.value = carro.transmissao;
-    campos.preco.value = carro.preco;
-    campos.descricao.value = carro.descricao;
-    campos.situacao.value = carro.situacao;
-
-    campos.foto.value = "";
-    campos.foto.required = false;
-
-    document.getElementById("titulo-form").textContent =
-        `Editar veículo #${carro.id}`;
-
-    document.getElementById("salvar-carro").textContent =
-        "Salvar alterações";
-
-    document.getElementById("cancelar-edicao").hidden = false;
-
-    formulario.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
+function formatarPreco(valor) {
+    return Number(valor).toLocaleString("pt-BR", {
+        style: "currency", currency: "BRL"
     });
 }
 
-// Exibe os veículos cadastrados
 function mostrarVeiculos() {
-    lista.innerHTML = "";
+    liberarCapas();
+    lista.replaceChildren();
+    document.getElementById("total-carros").textContent =
+        `${carrosAdmin.length} ${carrosAdmin.length === 1 ? "veículo cadastrado" : "veículos cadastrados"}`;
 
-    if (carrosAdmin.length === 0) {
+    if (!carrosAdmin.length) {
         lista.textContent = "Nenhum veículo cadastrado.";
         return;
     }
 
     carrosAdmin.forEach(carro => {
-        const item = document.createElement("article");
-        item.className = "admin-veiculo";
+        const card = document.createElement("article");
+        card.className = "admin-veiculo";
+        card.tabIndex = 0;
+        card.setAttribute("aria-label", `Editar ${carro.marca} ${carro.modelo}`);
+        card.addEventListener("click", evento => {
+            if (!evento.target.closest("button")) abrirEdicao(carro);
+        });
+        card.addEventListener("keydown", evento => {
+            if (evento.target === card && ["Enter", " "].includes(evento.key)) {
+                evento.preventDefault();
+                abrirEdicao(carro);
+            }
+        });
+        const areaImagem = document.createElement("div");
+        areaImagem.className = "admin-veiculo-imagem";
+        areaImagem.textContent = "Imagem indisponível";
 
+        if (carro.quantidadeFotos > 0) {
+            carregarArquivoFoto(carro.id, 0).then(arquivo => {
+                if (!card.isConnected) return;
+                const url = URL.createObjectURL(arquivo);
+                capasCards.add(url);
+                const imagem = document.createElement("img");
+                imagem.src = url;
+                imagem.alt = `${carro.marca} ${carro.modelo}`;
+                areaImagem.replaceChildren(imagem);
+            }).catch(() => {});
+        }
+
+        const corpo = document.createElement("div");
+        corpo.className = "admin-veiculo-corpo";
         const titulo = document.createElement("h3");
         titulo.textContent = `${carro.marca} ${carro.modelo}`;
-
-        const informacoes = document.createElement("p");
-        informacoes.textContent =
-            `#${carro.id} • ${carro.anoModelo} • ${carro.situacao}`;
-
+        const info = document.createElement("p");
+        info.textContent = `${carro.anoModelo} · ${carro.situacao} · ` +
+            `${carro.quantidadeFotos || 0} ${carro.quantidadeFotos === 1 ? "foto" : "fotos"}`;
         const preco = document.createElement("strong");
-        preco.textContent = Number(carro.preco).toLocaleString(
-            "pt-BR",
-            { style: "currency", currency: "BRL" }
-        );
+        preco.textContent = formatarPreco(carro.preco);
 
         const acoes = document.createElement("div");
         acoes.className = "admin-veiculo-acoes";
-
         const editar = document.createElement("button");
         editar.type = "button";
         editar.className = "botao-secundario";
-        editar.textContent = "Editar";
-        editar.addEventListener("click", () => editarCarro(carro));
-
-        const excluir = document.createElement("button");
-        excluir.type = "button";
-        excluir.className = "botao-excluir";
-        excluir.textContent = "Desativar";
-        excluir.disabled = carro.situacao === "INATIVO";
-
-        excluir.addEventListener("click", () => {
-            desativarCarro(carro);
-        });
-
-        acoes.append(editar, excluir);
-        item.append(titulo, informacoes, preco, acoes);
-        lista.appendChild(item);
+        editar.textContent = "Ver / Editar";
+        editar.addEventListener("click", () => abrirEdicao(carro));
+        const desativar = document.createElement("button");
+        desativar.type = "button";
+        desativar.className = "botao-excluir";
+        desativar.textContent = "Desativar";
+        desativar.disabled = carro.situacao === "INATIVO";
+        desativar.addEventListener("click", () => desativarCarro(carro));
+        acoes.append(editar, desativar);
+        corpo.append(titulo, info, preco, acoes);
+        card.append(areaImagem, corpo);
+        lista.append(card);
     });
 }
 
-// Consulta todos os veículos
 async function carregarVeiculosAdmin() {
     lista.textContent = "Carregando veículos...";
-
     try {
         carrosAdmin = await requisitar("/adm/carros");
         carrosAdmin.sort((a, b) => b.id - a.id);
-
         mostrarVeiculos();
-
     } catch (erro) {
         lista.textContent = "Não foi possível carregar os veículos.";
-        mostrarMensagemAdmin(erro.message);
+        mostrarMensagem(erro.message);
     }
 }
 
-// Cadastra ou atualiza um veículo
+function desenharGaleria() {
+    miniaturas.replaceChildren();
+    document.getElementById("contador-fotos").textContent = `${galeria.length} de 5 fotos`;
+
+    if (!galeria.length) {
+        miniaturas.textContent = "Nenhuma fotografia selecionada.";
+        return;
+    }
+
+    galeria.forEach((foto, indice) => {
+        const quadro = document.createElement("div");
+        quadro.className = `admin-miniatura${indice === 0 ? " capa" : ""}`;
+        const imagem = document.createElement("img");
+        imagem.src = foto.url;
+        imagem.alt = `Fotografia ${indice + 1} do veículo`;
+        const botoes = document.createElement("div");
+        botoes.className = "admin-miniatura-botoes";
+
+        if (indice === 0) {
+            const capa = document.createElement("span");
+            capa.className = "capa-label";
+            capa.textContent = "CAPA";
+            botoes.append(capa);
+        } else {
+            const capa = document.createElement("button");
+            capa.type = "button";
+            capa.textContent = "Definir capa";
+            capa.addEventListener("click", () => {
+                galeria.unshift(galeria.splice(indice, 1)[0]);
+                galeriaAlterada = true;
+                desenharGaleria();
+            });
+            botoes.append(capa);
+        }
+
+        const remover = document.createElement("button");
+        remover.type = "button";
+        remover.textContent = "Remover";
+        remover.setAttribute("aria-label", `Remover fotografia ${indice + 1}`);
+        remover.addEventListener("click", () => {
+            URL.revokeObjectURL(galeria[indice].url);
+            galeria.splice(indice, 1);
+            galeriaAlterada = true;
+            desenharGaleria();
+        });
+        botoes.append(remover);
+        quadro.append(imagem, botoes);
+        miniaturas.append(quadro);
+    });
+}
+
+function abrirModal() {
+    formulario.reset();
+    mostrarMensagem("", "erro", mensagemForm);
+    liberarGaleria();
+    galeriaAlterada = false;
+    idEmEdicao = null;
+    salvar.disabled = false;
+    modal.showModal();
+    desenharGaleria();
+}
+
+function abrirNovo() {
+    versaoModal++;
+    abrirModal();
+    document.getElementById("titulo-form").textContent = "Cadastrar veículo";
+    salvar.textContent = "Cadastrar veículo";
+}
+
+async function abrirEdicao(carro) {
+    const versao = ++versaoModal;
+    abrirModal();
+    idEmEdicao = carro.id;
+    document.getElementById("titulo-form").textContent = `Editar ${carro.marca} ${carro.modelo}`;
+    salvar.textContent = "Salvar alterações";
+    const campos = formulario.elements;
+    for (const nome of ["marca", "modelo", "anoFabricacao", "anoModelo", "cor",
+        "quilometragem", "combustivel", "transmissao", "preco", "descricao", "situacao"]) {
+        campos.namedItem(nome).value = carro[nome];
+    }
+
+    // Fazemos o download das fotos existentes para mostrá-las e, se necessário,
+    // reenviar somente a galeria resultante ao endpoint já existente.
+    salvar.disabled = true;
+    miniaturas.textContent = "Carregando fotografias...";
+    const carregadas = [];
+    try {
+        for (let i = 0; i < (carro.quantidadeFotos || 0); i++) {
+            const arquivo = await carregarArquivoFoto(carro.id, i);
+            carregadas.push({ arquivo, url: URL.createObjectURL(arquivo) });
+        }
+        if (versao !== versaoModal || !modal.open) {
+            carregadas.forEach(foto => URL.revokeObjectURL(foto.url));
+            return;
+        }
+        galeria = carregadas;
+        desenharGaleria();
+        salvar.disabled = false;
+    } catch (erro) {
+        carregadas.forEach(foto => URL.revokeObjectURL(foto.url));
+        if (versao !== versaoModal) return;
+        mostrarMensagem("Não foi possível abrir a galeria. Tente novamente.", "erro", mensagemForm);
+        miniaturas.textContent = "Erro ao carregar fotografias.";
+    }
+}
+
+function obterDadosFormulario() {
+    const campos = formulario.elements;
+    const valor = nome => campos.namedItem(nome).value;
+    return {
+        marca: valor("marca").trim(),
+        modelo: valor("modelo").trim(),
+        anoFabricacao: Number(valor("anoFabricacao")),
+        anoModelo: Number(valor("anoModelo")),
+        cor: valor("cor").trim(),
+        quilometragem: Number(valor("quilometragem")),
+        combustivel: valor("combustivel").trim(),
+        transmissao: valor("transmissao").trim(),
+        preco: valor("preco"),
+        descricao: valor("descricao").trim(),
+        situacao: valor("situacao")
+    };
+}
+
+function montarEnvioFotos() {
+    const dados = new FormData();
+    galeria.forEach(item => dados.append("fotos", item.arquivo));
+    return dados;
+}
+
+formulario.elements.namedItem("fotos").addEventListener("change", evento => {
+    const arquivos = Array.from(evento.target.files);
+    evento.target.value = "";
+    if (galeria.length + arquivos.length > 5) {
+        mostrarMensagem("O limite é de 5 fotografias.", "erro", mensagemForm);
+        return;
+    }
+    if (arquivos.some(foto => foto.size > 5 * 1024 * 1024 ||
+        !["image/jpeg", "image/png", "image/webp"].includes(foto.type))) {
+        mostrarMensagem("Use fotos JPG, PNG ou WebP de até 5 MB.", "erro", mensagemForm);
+        return;
+    }
+    arquivos.forEach(arquivo => galeria.push({ arquivo, url: URL.createObjectURL(arquivo) }));
+    if (arquivos.length) galeriaAlterada = true;
+    mostrarMensagem("", "erro", mensagemForm);
+    desenharGaleria();
+});
+
 formulario.addEventListener("submit", async evento => {
     evento.preventDefault();
-
-    const dados = obterDadosFormulario();
-    const foto = formulario.elements.foto.files[0];
-    const botao = document.getElementById("salvar-carro");
-
-    if (!idEmEdicao && !foto) {
-        mostrarMensagemAdmin("Selecione uma fotografia para cadastrar.");
-        return;
-    }
-
-    if (foto && foto.size > 5 * 1024 * 1024) {
-        mostrarMensagemAdmin("A fotografia deve ter até 5 MB.");
-        return;
-    }
-
+    if (!formulario.reportValidity()) return;
     const editando = idEmEdicao !== null;
-    let informacoesSalvas = false;
+    if ((!editando || galeriaAlterada) && (galeria.length < 3 || galeria.length > 5)) {
+        mostrarMensagem("Para salvar a galeria, deixe de 3 a 5 fotografias.", "erro", mensagemForm);
+        return;
+    }
 
-    botao.disabled = true;
-    mostrarMensagemAdmin("");
-
+    salvar.disabled = true;
+    mostrarMensagem("", "erro", mensagemForm);
+    let dadosSalvos = false;
     try {
+        const dados = obterDadosFormulario();
         if (!editando) {
-            // Cadastro: dados JSON + fotografia
-            const envio = new FormData();
-
-            envio.append(
-                "dados",
-                new Blob(
-                    [JSON.stringify(dados)],
-                    { type: "application/json" }
-                )
-            );
-
-            envio.append("foto", foto);
-
-            await requisitar("/carros", {
-                method: "POST",
-                body: envio
-            });
-
+            const envio = montarEnvioFotos();
+            envio.append("dados", new Blob([JSON.stringify(dados)], { type: "application/json" }));
+            await requisitar("/carros", { method: "POST", body: envio });
         } else {
-            // Atualização das informações
             await requisitar(`/carros/${idEmEdicao}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(dados)
             });
-
-            informacoesSalvas = true;
-
-            // A fotografia só é alterada se uma nova for escolhida
-            if (foto) {
-                const envioFoto = new FormData();
-                envioFoto.append("foto", foto);
-
-                await requisitar(`/carros/${idEmEdicao}/foto`, {
-                    method: "PUT",
-                    body: envioFoto
+            dadosSalvos = true;
+            if (galeriaAlterada) {
+                await requisitar(`/carros/${idEmEdicao}/fotos`, {
+                    method: "PUT", body: montarEnvioFotos()
                 });
             }
         }
-
-        limparFormulario();
+        modal.close();
         await carregarVeiculosAdmin();
-
-        mostrarMensagemAdmin(
-            editando
-                ? "Veículo atualizado com sucesso!"
-                : "Veículo cadastrado com sucesso!",
-            "sucesso"
-        );
-
+        mostrarMensagem(editando ? "Veículo atualizado com sucesso!" :
+            "Veículo cadastrado com sucesso!", "sucesso");
     } catch (erro) {
-        const texto = informacoesSalvas
-            ? `Os dados foram salvos, mas a fotografia não foi atualizada. ${erro.message}`
-            : erro.message;
-
-        mostrarMensagemAdmin(texto);
-
+        mostrarMensagem(dadosSalvos ? `Dados salvos, mas houve um erro nas fotos. ${erro.message}` :
+            erro.message, "erro", mensagemForm);
         console.error(erro);
-
     } finally {
-        botao.disabled = false;
+        salvar.disabled = false;
     }
 });
 
-// Desativa um veículo sem removê-lo do banco
 async function desativarCarro(carro) {
-    const confirmar = confirm(
-        `Deseja desativar ${carro.marca} ${carro.modelo}?`
-    );
-
-    if (!confirmar) return;
-
+    if (!confirm(`Deseja desativar ${carro.marca} ${carro.modelo}?`)) return;
     try {
-        await requisitar(`/carros/${carro.id}`, {
-            method: "DELETE"
-        });
-
+        await requisitar(`/carros/${carro.id}`, { method: "DELETE" });
         await carregarVeiculosAdmin();
-
-        if (idEmEdicao === carro.id) {
-            limparFormulario();
-        }
-
-        mostrarMensagemAdmin(
-            "Veículo desativado com sucesso!",
-            "sucesso"
-        );
-
+        mostrarMensagem("Veículo desativado com sucesso!", "sucesso");
     } catch (erro) {
-        mostrarMensagemAdmin(erro.message);
+        mostrarMensagem(erro.message);
     }
 }
 
-// Botões auxiliares
-document.getElementById("cancelar-edicao")
-    .addEventListener("click", limparFormulario);
+modal.addEventListener("close", () => {
+    versaoModal++;
+    liberarGaleria();
+});
+document.getElementById("novo-carro").addEventListener("click", abrirNovo);
+document.getElementById("fechar-modal").addEventListener("click", () => modal.close());
+document.getElementById("cancelar-edicao").addEventListener("click", () => modal.close());
+document.getElementById("atualizar-lista").addEventListener("click", carregarVeiculosAdmin);
+document.getElementById("botao-sair").addEventListener("click", () => {
+    sessionStorage.removeItem("garagem_token");
+    window.location.href = "/login.html";
+});
 
-document.getElementById("atualizar-lista")
-    .addEventListener("click", carregarVeiculosAdmin);
-
-document.getElementById("botao-sair")
-    .addEventListener("click", () => {
-        sessionStorage.removeItem("garagem_token");
-        window.location.href = "/login.html";
-    });
-
-// Inicialização
 if (!possuiPerfilAdmin(tokenAdmin)) {
     aviso.hidden = false;
-    aviso.textContent =
-        "Acesso restrito. Entre com uma conta de administrador.";
-
+    aviso.textContent = "Acesso restrito. Entre com uma conta de administrador.";
 } else {
     aviso.hidden = true;
     painel.hidden = false;
-
     carregarVeiculosAdmin();
 }

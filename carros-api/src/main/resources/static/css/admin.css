@@ -1,258 +1,76 @@
-/* Painel administrativo */
+/* Painel administrativo: cartões como no catálogo, edição em janela. */
+.admin-area { min-height: 75vh; padding-top: 55px; padding-bottom: 95px; }
+.admin-topo { margin-bottom: 35px; }
+.admin-topo h1 { font-size: clamp(29px, 4vw, 40px); line-height: 1.2; margin-bottom: 8px; }
+.admin-topo p:last-child, .admin-lista-topo p { color: #aeb2b8; font-size: 14px; }
+.admin-topo .destaque { margin-bottom: 10px; }
+.aviso-acesso { padding: 18px; background: #1b2026; border: 1px solid #30363d; border-radius: 9px; color: #e8bd7b; }
+.aviso-acesso[hidden], #painel-admin[hidden] { display: none; }
 
-.admin-area {
-    min-height: 75vh;
-    padding-top: 60px;
-    padding-bottom: 100px;
-}
+.admin-lista-topo { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 25px; }
+.admin-lista-topo h2 { font-size: 24px; margin-bottom: 4px; }
+.admin-topo-acoes { display: flex; flex-wrap: wrap; gap: 10px; }
+.botao-admin, .botao-secundario, .botao-excluir { padding: 12px 17px; border: 0; border-radius: 6px; font: inherit; font-size: 13px; font-weight: bold; cursor: pointer; }
+.botao-admin { background: #d6aa65; color: #101317; }
+.botao-admin:hover { background: #e8bd7b; }
+.botao-secundario { background: #30363d; color: #fff; }
+.botao-secundario:hover { background: #444b54; }
+.botao-excluir { background: #49302f; color: #ffb7b0; }
+.botao-excluir:hover { background: #633b39; }
+button:disabled { opacity: .55; cursor: not-allowed; }
+.mensagem-admin { color: #ff9999; font-size: 14px; margin: 12px 0; }
+.mensagem-admin:empty { display: none; }
+.mensagem-admin.sucesso { color: #9bdcb4; }
 
-.admin-topo {
-    margin-bottom: 35px;
-}
+#lista-admin { display: grid; grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)); gap: 22px; }
+.admin-veiculo { overflow: hidden; border: 1px solid #30363d; border-radius: 11px; background: #1b2026; cursor: pointer; transition: border-color .2s, transform .2s; }
+.admin-veiculo:hover { border-color: #d6aa65; transform: translateY(-3px); }
+.admin-veiculo:focus-visible { outline: 2px solid #d6aa65; outline-offset: 3px; }
+.admin-veiculo-imagem { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 16 / 10; background: #252b32; color: #aeb2b8; font-size: 13px; }
+.admin-veiculo-imagem img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.admin-veiculo-corpo { padding: 18px; }
+.admin-veiculo h3 { font-size: 19px; line-height: 1.3; color: #fff; margin-bottom: 6px; }
+.admin-veiculo p { font-size: 12px; color: #aeb2b8; margin-bottom: 8px; }
+.admin-veiculo strong { display: block; font-size: 22px; color: #d6aa65; }
+.admin-veiculo-acoes { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 16px; }
+.admin-veiculo-acoes .botao-secundario { flex: 1; }
 
-.admin-topo h1 {
-    font-size: 38px;
-    margin-bottom: 8px;
-}
-
-.admin-topo > p:last-child {
-    color: #aeb2b8;
-}
-
-.aviso-acesso {
-    padding: 20px;
-    background: #1b2026;
-    border: 1px solid #30363d;
-    border-radius: 8px;
-    color: #e8bd7b;
-}
-
-.aviso-acesso[hidden],
-#painel-admin[hidden] {
-    display: none;
-}
-
-.admin-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 25px;
-    align-items: start;
-}
-
-.admin-bloco {
-    min-width: 0;
-    padding: 25px;
-    background: #1b2026;
-    border: 1px solid #30363d;
-    border-radius: 10px;
-}
-
-.admin-bloco h2 {
-    font-size: 22px;
-    margin-bottom: 24px;
-}
-
-/* Formulário */
-
-.admin-campos {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-}
-
-.admin-campos label {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    font-size: 13px;
-    font-weight: bold;
-}
-
-.admin-campos input,
-.admin-campos select,
-.admin-campos textarea {
-    width: 100%;
-    padding: 12px;
-    background: #101317;
-    border: 1px solid #30363d;
-    border-radius: 5px;
-    color: #ffffff;
-    font: inherit;
-    font-size: 14px;
-}
-
-.admin-campos input:focus,
-.admin-campos select:focus,
-.admin-campos textarea:focus {
-    outline: none;
-    border-color: #d6aa65;
-}
-
-.admin-campos textarea {
-    resize: vertical;
-}
-
-.admin-campos .campo-largo {
-    grid-column: 1 / -1;
-}
-
-.admin-campos small {
-    color: #aeb2b8;
-    font-size: 12px;
-    font-weight: normal;
-}
-
-.admin-acoes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 25px;
-}
-
-/* Botões */
-
-.botao-admin,
-.botao-secundario,
-.botao-excluir {
-    padding: 12px 17px;
-    border: none;
-    border-radius: 5px;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.botao-admin {
-    background: #d6aa65;
-    color: #101317;
-}
-
-.botao-admin:hover {
-    background: #e8bd7b;
-}
-
-.botao-secundario {
-    background: #30363d;
-    color: #ffffff;
-}
-
-.botao-secundario:hover {
-    background: #444b54;
-}
-
-.botao-excluir {
-    background: #49302f;
-    color: #ffb7b0;
-}
-
-.botao-excluir:hover {
-    background: #633b39;
-}
-
-button:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-}
-
-/* Mensagens */
-
-.mensagem-admin {
-    margin-bottom: 20px;
-    font-size: 14px;
-}
-
-.mensagem-admin:empty {
-    display: none;
-}
-
-.mensagem-admin.sucesso {
-    color: #9bdcb4;
-}
-
-.mensagem-admin.erro {
-    color: #ff9999;
-}
-
-/* Lista de veículos */
-
-.admin-lista-topo {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.admin-lista-topo h2 {
-    margin-bottom: 0;
-}
-
-#lista-admin {
-    display: grid;
-    gap: 14px;
-    color: #aeb2b8;
-}
-
-.admin-veiculo {
-    padding: 18px;
-    background: #101317;
-    border: 1px solid #30363d;
-    border-radius: 8px;
-}
-
-.admin-veiculo h3 {
-    color: #ffffff;
-    font-size: 18px;
-    margin-bottom: 6px;
-}
-
-.admin-veiculo p {
-    font-size: 13px;
-    margin-bottom: 8px;
-}
-
-.admin-veiculo strong {
-    display: block;
-    color: #d6aa65;
-    font-size: 20px;
-}
-
-.admin-veiculo-acoes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 16px;
-}
-
-/* Responsividade */
-
-@media (max-width: 900px) {
-    .admin-layout {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 600px) {
-    .admin-area {
-        padding-top: 40px;
-        padding-bottom: 60px;
-    }
-
-    .admin-topo h1 {
-        font-size: 30px;
-    }
-
-    .admin-bloco {
-        padding: 18px;
-    }
-
-    .admin-campos {
-        grid-template-columns: 1fr;
-    }
-
-    .admin-lista-topo {
-        align-items: flex-start;
-        flex-direction: column;
-    }
+/* Modal nativo - sem bibliotecas. */
+.modal-carro { width: min(780px, calc(100% - 28px)); max-height: min(90vh, 900px); margin: auto; padding: 0; color: #fff; background: #1b2026; border: 1px solid #41474e; border-radius: 13px; overflow-y: auto; }
+.modal-carro::backdrop { background: rgba(0,0,0,.82); }
+.modal-topo { display: flex; justify-content: space-between; align-items: start; gap: 16px; padding: 26px 28px 20px; border-bottom: 1px solid #30363d; }
+.modal-topo .destaque { margin-bottom: 8px; }
+.modal-topo h2 { font-size: 25px; line-height: 1.2; }
+.modal-fechar { border: 0; background: transparent; color: #ddd; font-size: 30px; line-height: 1; cursor: pointer; }
+.modal-fechar:hover { color: #d6aa65; }
+#form-carro { padding: 24px 28px 28px; }
+.admin-campos { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 15px; }
+.admin-campos label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: bold; }
+.admin-campos input, .admin-campos select, .admin-campos textarea { width: 100%; padding: 11px 12px; background: #101317; border: 1px solid #30363d; border-radius: 6px; color: #fff; font: inherit; font-size: 14px; }
+.admin-campos :is(input,select,textarea):focus { outline: 1px solid #d6aa65; border-color: #d6aa65; }
+.admin-campos textarea { resize: vertical; }
+.admin-campos .campo-largo { grid-column: 1 / -1; }
+.admin-galeria { margin-top: 25px; padding-top: 22px; border-top: 1px solid #30363d; }
+.admin-galeria-titulo { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.admin-galeria h3 { font-size: 19px; }
+.admin-galeria-titulo span { font-size: 13px; color: #d6aa65; }
+.admin-galeria p, .admin-galeria small { display: block; color: #aeb2b8; font-size: 12px; margin: 8px 0 12px; }
+.admin-miniaturas { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; margin: 15px 0; }
+.admin-miniatura { min-width: 0; border: 1px solid #30363d; background: #101317; border-radius: 7px; padding: 5px; }
+.admin-miniatura.capa { border-color: #d6aa65; }
+.admin-miniatura img { display: block; width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 4px; }
+.admin-miniatura-botoes { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; margin-top: 5px; }
+.admin-miniatura button { font-size: 10px; padding: 5px 6px; border: 0; border-radius: 4px; color: #fff; background: #30363d; cursor: pointer; }
+.admin-miniatura button:hover { background: #444b54; }
+.admin-miniatura .capa-label { color: #d6aa65; font-size: 10px; font-weight: bold; padding: 5px 0; }
+.admin-upload { display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: bold; }
+.admin-upload input { width: 100%; color: #ddd; font: inherit; font-size: 12px; }
+.admin-acoes { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+@media (max-width: 700px) {
+    .admin-area { padding: 35px 0 55px; }
+    .admin-lista-topo { align-items: flex-start; flex-direction: column; }
+    .modal-topo { padding: 20px; }
+    #form-carro { padding: 20px; }
+    .admin-campos { grid-template-columns: 1fr; }
+    .admin-miniaturas { grid-template-columns: repeat(3, minmax(0,1fr)); }
 }

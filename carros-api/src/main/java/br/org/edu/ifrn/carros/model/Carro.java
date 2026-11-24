@@ -1,8 +1,10 @@
-
 package br.org.edu.ifrn.carros.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "carro")
@@ -46,8 +48,19 @@ public class Carro {
     @Column(nullable = false, length = 20)
     private SituacaoCarro situacao;
 
+    // Mantido para preservar as fotos dos veículos já cadastrados.
     @Column(name = "foto_principal", length = 80)
     private String fotoPrincipal;
+
+    // Hibernate cria a tabela carro_fotos_adicionais automaticamente.
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "carro_fotos_adicionais",
+            joinColumns = @JoinColumn(name = "carro_id")
+    )
+    @OrderColumn(name = "ordem")
+    @Column(name = "arquivo", nullable = false, length = 80)
+    private List<String> fotosAdicionais = new ArrayList<>();
 
     protected Carro() {
     }
@@ -82,6 +95,43 @@ public class Carro {
         this.situacao = SituacaoCarro.INATIVO;
     }
 
+    // Usado pelo endpoint antigo de troca de uma única fotografia.
+    public void definirFoto(String fotoPrincipal) {
+        this.fotoPrincipal = fotoPrincipal;
+    }
+
+    public void definirGaleria(List<String> arquivos) {
+        if (arquivos == null || arquivos.isEmpty()) {
+            throw new IllegalArgumentException("A galeria precisa ter fotografias.");
+        }
+        this.fotoPrincipal = arquivos.get(0);
+        this.fotosAdicionais.clear();
+        this.fotosAdicionais.addAll(arquivos.subList(1, arquivos.size()));
+    }
+
+    @JsonIgnore
+    public List<String> getNomesDasFotos() {
+        List<String> arquivos = new ArrayList<>();
+        if (fotoPrincipal != null && !fotoPrincipal.isBlank()) {
+            arquivos.add(fotoPrincipal);
+        }
+        arquivos.addAll(fotosAdicionais);
+        return arquivos;
+    }
+
+    @JsonIgnore
+    public String getNomeFoto(int indice) {
+        List<String> arquivos = getNomesDasFotos();
+        return indice >= 0 && indice < arquivos.size()
+                ? arquivos.get(indice)
+                : null;
+    }
+
+    // Campo disponível no JSON para o frontend construir as miniaturas.
+    public int getQuantidadeFotos() {
+        return getNomesDasFotos().size();
+    }
+
     public Long getId() { return id; }
     public String getMarca() { return marca; }
     public String getModelo() { return modelo; }
@@ -94,10 +144,5 @@ public class Carro {
     public BigDecimal getPreco() { return preco; }
     public String getDescricao() { return descricao; }
     public SituacaoCarro getSituacao() { return situacao; }
-    public String getFotoPrincipal() {
-        return fotoPrincipal;
-    }
-    public void definirFoto(String fotoPrincipal) {
-        this.fotoPrincipal = fotoPrincipal;
-    }
+    public String getFotoPrincipal() { return fotoPrincipal; }
 }

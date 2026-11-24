@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -15,129 +14,86 @@
         <a href="/" class="logo">GARAGEM<span>.</span></a>
 
         <div class="nav-acoes">
-            <a href="/#catalogo" class="menu-link">
-                Ver veículos
-            </a>
-
-            <a href="/login.html"
-               class="menu-link"
-               id="link-entrar">
-                Entrar
-            </a>
-
-            <a href="/cadastro.html"
-               class="menu-link"
-               id="link-cadastro">
-                Criar conta
-            </a>
-
-            <a href="/admin.html"
-               class="menu-link"
-               id="link-admin"
-               hidden>
-                Painel
-            </a>
-
-            <button type="button" id="botao-sair" hidden>
-                Sair
-            </button>
+            <a href="/#catalogo" class="menu-link">Ver veículos</a>
+            <a href="/login.html" class="menu-link" id="link-entrar">Entrar</a>
+            <a href="/cadastro.html" class="menu-link" id="link-cadastro">Criar conta</a>
+            <a href="/admin.html" class="menu-link" id="link-admin" hidden>Painel</a>
+            <button type="button" id="botao-sair" hidden>Sair</button>
         </div>
     </nav>
 </header>
 
 <main class="container pagina-detalhes">
+    <a href="/#catalogo" class="link-voltar">← Voltar ao catálogo</a>
 
-    <a href="/#catalogo" class="link-voltar">
-        ← Voltar ao catálogo
-    </a>
+    <p id="mensagem-detalhes" role="status">Carregando veículo...</p>
 
-    <p id="mensagem-detalhes">Carregando veículo...</p>
+    <div id="conteudo-detalhes" class="conteudo-detalhes" hidden>
+        <section class="detalhes-topo">
+            <div class="coluna-imagem">
+                <div id="imagem-detalhes" class="imagem-detalhes"></div>
 
-    <section id="conteudo-detalhes" class="conteudo-detalhes" hidden>
+                <!-- Miniaturas aparecem automaticamente se houver várias fotos. -->
+                <div id="galeria-miniaturas"
+                     class="galeria-miniaturas"
+                     aria-label="Fotografias do veículo"
+                     hidden></div>
+            </div>
 
-        <!-- Fotografia do veículo -->
-        <div class="coluna-imagem">
-            <div id="imagem-detalhes" class="imagem-detalhes"></div>
-        </div>
+            <div class="coluna-informacoes">
+                <p class="destaque">DETALHES DO VEÍCULO</p>
+                <h1 id="carro-nome"></h1>
+                <p class="subtitulo-detalhes">
+                    Conheça as características deste veículo.
+                </p>
 
-        <!-- Informações principais -->
-        <div class="coluna-informacoes">
-            <p class="destaque">DETALHES DO VEÍCULO</p>
+                <strong id="carro-preco" class="preco-detalhes"></strong>
 
-            <h1 id="carro-nome"></h1>
-
-            <p class="subtitulo-detalhes">
-                Conheça as características deste veículo.
-            </p>
-
-            <strong id="carro-preco" class="preco-detalhes"></strong>
-
-            <h2>Especificações</h2>
-
-            <div class="especificacoes">
-                <div>
-                    <span>Marca</span>
-                    <strong id="carro-marca"></strong>
-                </div>
-
-                <div>
-                    <span>Modelo</span>
-                    <strong id="carro-modelo"></strong>
-                </div>
-
-                <div>
-                    <span>Ano de fabricação</span>
-                    <strong id="carro-ano-fabricacao"></strong>
-                </div>
-
-                <div>
-                    <span>Ano do modelo</span>
-                    <strong id="carro-ano-modelo"></strong>
-                </div>
-
-                <div>
-                    <span>Quilometragem</span>
-                    <strong id="carro-quilometragem"></strong>
-                </div>
-
-                <div>
-                    <span>Cor</span>
-                    <strong id="carro-cor"></strong>
-                </div>
-
-                <div>
-                    <span>Combustível</span>
-                    <strong id="carro-combustivel"></strong>
-                </div>
-
-                <div>
-                    <span>Transmissão</span>
-                    <strong id="carro-transmissao"></strong>
+                <h2>Especificações</h2>
+                <div class="especificacoes">
+                    <div>
+                        <span>Ano de fabricação</span>
+                        <strong id="carro-ano-fabricacao"></strong>
+                    </div>
+                    <div>
+                        <span>Ano do modelo</span>
+                        <strong id="carro-ano-modelo"></strong>
+                    </div>
+                    <div>
+                        <span>Quilometragem</span>
+                        <strong id="carro-quilometragem"></strong>
+                    </div>
+                    <div>
+                        <span>Cor</span>
+                        <strong id="carro-cor"></strong>
+                    </div>
+                    <div>
+                        <span>Combustível</span>
+                        <strong id="carro-combustivel"></strong>
+                    </div>
+                    <div>
+                        <span>Transmissão</span>
+                        <strong id="carro-transmissao"></strong>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Descrição do veículo -->
-        <div class="descricao-detalhes">
+        <section class="descricao-detalhes">
             <h2>Sobre o veículo</h2>
             <p id="carro-descricao"></p>
-        </div>
-
-    </section>
+        </section>
+    </div>
 </main>
 
 <footer>
     <div class="container">
-        <p>GARAGEM — Loja de Veículos</p>
+        <p>GARAGEM</p>
         <p>Encontre seu próximo carro.</p>
     </div>
 </footer>
 
-<!-- JavaScript dos detalhes -->
 <script src="/js/detalhes.js"></script>
-
-<!-- JavaScript da autenticação -->
 <script src="/js/auth.js"></script>
-
 </body>
 </html>

@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Painel Administrativo | GARAGEM</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body>
-
 <header>
     <nav class="container">
         <a href="/" class="logo">GARAGEM<span>.</span></a>
-
         <div class="nav-acoes">
             <a href="/" class="menu-link">Voltar à loja</a>
             <button type="button" id="botao-sair">Sair</button>
@@ -22,153 +19,105 @@
 </header>
 
 <main class="container admin-area">
-
     <div class="admin-topo">
-        <p class="destaque">GERENCIAMENTO</p>
-        <h1>Painel administrativo</h1>
-        <p>Gerencie os veículos cadastrados na GARAGEM.</p>
+        <div>
+            <p class="destaque">GERENCIAMENTO</p>
+            <h1>Painel administrativo</h1>
+            <p>Gerencie os veículos cadastrados na GARAGEM.</p>
+        </div>
     </div>
 
     <p id="aviso-acesso" class="aviso-acesso" hidden></p>
 
     <div id="painel-admin" hidden>
+        <p id="mensagem-admin" class="mensagem-admin" role="status" aria-live="polite"></p>
 
-        <p id="mensagem-admin"
-           class="mensagem-admin"
-           role="status"
-           aria-live="polite"></p>
-
-        <div class="admin-layout">
-
-            <!-- Formulário de cadastro e edição -->
-            <section class="admin-bloco">
-                <h2 id="titulo-form">Cadastrar veículo</h2>
-
-                <form id="form-carro">
-                    <div class="admin-campos">
-
-                        <label>
-                            Marca
-                            <input type="text" name="marca"
-                                   maxlength="80" required>
-                        </label>
-
-                        <label>
-                            Modelo
-                            <input type="text" name="modelo"
-                                   maxlength="120" required>
-                        </label>
-
-                        <label>
-                            Ano de fabricação
-                            <input type="number" name="anoFabricacao"
-                                   min="1886" max="2100" required>
-                        </label>
-
-                        <label>
-                            Ano do modelo
-                            <input type="number" name="anoModelo"
-                                   min="1886" max="2100" required>
-                        </label>
-
-                        <label>
-                            Cor
-                            <input type="text" name="cor"
-                                   maxlength="60" required>
-                        </label>
-
-                        <label>
-                            Quilometragem
-                            <input type="number" name="quilometragem"
-                                   min="0" required>
-                        </label>
-
-                        <label>
-                            Combustível
-                            <input type="text" name="combustivel"
-                                   maxlength="40" required>
-                        </label>
-
-                        <label>
-                            Transmissão
-                            <input type="text" name="transmissao"
-                                   maxlength="40" required>
-                        </label>
-
-                        <label>
-                            Preço (R$)
-                            <input type="number" name="preco"
-                                   min="0.01" step="0.01" required>
-                        </label>
-
-                        <label>
-                            Situação
-                            <select name="situacao" required>
-                                <option value="DISPONIVEL">Disponível</option>
-                                <option value="VENDIDO">Vendido</option>
-                                <option value="INATIVO">Inativo</option>
-                            </select>
-                        </label>
-
-                        <label class="campo-largo">
-                            Descrição
-                            <textarea name="descricao"
-                                      rows="4"
-                                      maxlength="2000"
-                                      required></textarea>
-                        </label>
-
-                        <label class="campo-largo">
-                            Fotografia
-                            <input type="file"
-                                   name="foto"
-                                   accept="image/jpeg,image/png,image/webp"
-                                   required>
-                            <small>
-                                JPG, PNG ou WebP, até 5 MB.
-                                Na edição, a foto é opcional.
-                            </small>
-                        </label>
-
-                    </div>
-
-                    <div class="admin-acoes">
-                        <button type="submit"
-                                id="salvar-carro"
-                                class="botao-admin">
-                            Cadastrar veículo
-                        </button>
-
-                        <button type="button"
-                                id="cancelar-edicao"
-                                class="botao-secundario"
-                                hidden>
-                            Cancelar edição
-                        </button>
-                    </div>
-                </form>
-            </section>
-
-            <!-- Veículos cadastrados -->
-            <section class="admin-bloco">
-                <div class="admin-lista-topo">
-                    <h2>Veículos cadastrados</h2>
-                    <button type="button"
-                            id="atualizar-lista"
-                            class="botao-secundario">
-                        Atualizar
-                    </button>
-                </div>
-
-                <div id="lista-admin">
-                    Carregando veículos...
-                </div>
-            </section>
-
+        <div class="admin-lista-topo">
+            <div>
+                <h2>Veículos cadastrados</h2>
+                <p id="total-carros">Carregando...</p>
+            </div>
+            <div class="admin-topo-acoes">
+                <button type="button" id="atualizar-lista" class="botao-secundario">Atualizar</button>
+                <button type="button" id="novo-carro" class="botao-admin">+ Novo veículo</button>
+            </div>
         </div>
+        <div id="lista-admin" aria-live="polite">Carregando veículos...</div>
+    </div>
+</main>
+
+<!-- Usamos o dialog nativo do navegador, sem dependências externas. -->
+<dialog id="modal-carro" class="modal-carro" aria-labelledby="titulo-form">
+    <div class="modal-topo">
+        <div>
+            <p class="destaque">GARAGEM · ADMINISTRAÇÃO</p>
+            <h2 id="titulo-form">Cadastrar veículo</h2>
+        </div>
+        <button type="button" id="fechar-modal" class="modal-fechar" aria-label="Fechar janela">×</button>
     </div>
 
-</main>
+    <form id="form-carro">
+        <div class="admin-campos">
+            <label>Marca
+                <input type="text" name="marca" maxlength="80" required>
+            </label>
+            <label>Modelo
+                <input type="text" name="modelo" maxlength="120" required>
+            </label>
+            <label>Ano de fabricação
+                <input type="number" name="anoFabricacao" min="1886" max="2100" required>
+            </label>
+            <label>Ano do modelo
+                <input type="number" name="anoModelo" min="1886" max="2100" required>
+            </label>
+            <label>Cor
+                <input type="text" name="cor" maxlength="60" required>
+            </label>
+            <label>Quilometragem
+                <input type="number" name="quilometragem" min="0" required>
+            </label>
+            <label>Combustível
+                <input type="text" name="combustivel" maxlength="40" required>
+            </label>
+            <label>Transmissão
+                <input type="text" name="transmissao" maxlength="40" required>
+            </label>
+            <label>Preço (R$)
+                <input type="number" name="preco" min="0.01" step="0.01" required>
+            </label>
+            <label>Situação
+                <select name="situacao" required>
+                    <option value="DISPONIVEL">Disponível</option>
+                    <option value="VENDIDO">Vendido</option>
+                    <option value="INATIVO">Inativo</option>
+                </select>
+            </label>
+            <label class="campo-largo">Descrição
+                <textarea name="descricao" rows="3" maxlength="2000" required></textarea>
+            </label>
+        </div>
+
+        <div class="admin-galeria">
+            <div class="admin-galeria-titulo">
+                <h3>Fotografias</h3>
+                <span id="contador-fotos">0 de 5 fotos</span>
+            </div>
+            <p>Veja as imagens, escolha a capa ou remova fotos. Para salvar uma nova galeria, são necessárias de 3 a 5 fotos.</p>
+            <div id="lista-fotos-modal" class="admin-miniaturas" aria-live="polite"></div>
+            <label class="admin-upload">
+                Adicionar fotografias
+                <input type="file" name="fotos" accept="image/jpeg,image/png,image/webp" multiple>
+            </label>
+            <small>Até 5 MB por fotografia. Carros antigos com uma foto continuam funcionando enquanto a galeria não for alterada.</small>
+        </div>
+
+        <p id="mensagem-form" class="mensagem-admin" role="status" aria-live="polite"></p>
+        <div class="admin-acoes">
+            <button type="button" id="cancelar-edicao" class="botao-secundario">Cancelar</button>
+            <button type="submit" id="salvar-carro" class="botao-admin">Cadastrar veículo</button>
+        </div>
+    </form>
+</dialog>
 
 <footer>
     <div class="container">
@@ -176,8 +125,6 @@
         <p>Gerenciamento de veículos</p>
     </div>
 </footer>
-
 <script src="/js/admin.js"></script>
-
 </body>
 </html>

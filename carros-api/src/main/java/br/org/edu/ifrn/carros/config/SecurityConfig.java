@@ -1,4 +1,3 @@
-
 package br.org.edu.ifrn.carros.config;
 
 import jakarta.servlet.DispatcherType;
@@ -18,97 +17,49 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
-
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
 
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
             String perfil = jwt.getClaimAsString("perfil");
-
             if (!"ADMIN".equals(perfil) && !"CLIENTE".equals(perfil)) {
                 return List.of();
             }
-
-            return List.of(
-                    new SimpleGrantedAuthority("ROLE_" + perfil)
-            );
+            return List.of(new SimpleGrantedAuthority("ROLE_" + perfil));
         });
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
-                )
-
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-
                 .authorizeHttpRequests(auth -> auth
-
-                        // Tratamento de erros
-                        .dispatcherTypeMatchers(
-                                DispatcherType.ERROR
-                        ).permitAll()
-
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/error").permitAll()
 
-                        // Páginas públicas do frontend
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/",
-                                "/index.html",
-                                "/detalhes.html",
-                                "/login.html",
-                                "/cadastro.html",
-                                "/admin.html",
-                                "/css/**",
-                                "/js/**"
-                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/", "/index.html", "/detalhes.html",
+                                "/login.html", "/cadastro.html", "/admin.html",
+                                "/css/**", "/js/**").permitAll()
 
-                        // Cadastro de usuários e login
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/auth/login",
-                                "/usuarios"
-                        ).permitAll()
+                        .requestMatchers(HttpMethod.POST,
+                                "/auth/login", "/usuarios").permitAll()
 
-                        // Consulta pública de veículos
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/carros",
-                                "/carros/*",
-                                "/carros/*/foto"
-                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/carros", "/carros/*", "/carros/*/foto",
+                                "/carros/*/fotos/*").permitAll()
 
-                        // Test-drives bloqueados
-                        .requestMatchers(
-                                "/test-drives/**"
-                        ).denyAll()
+                        .requestMatchers("/test-drives/**").denyAll()
 
-                        // Funcionalidades exclusivas do administrador
-                        .requestMatchers(
-                                "/carros/**",
-                                "/usuarios/**",
-                                "/vendas/**",
-                                "/contabilidade/**",
-                                "/adm/**"
-                        ).hasRole("ADMIN")
+                        .requestMatchers("/carros/**", "/usuarios/**",
+                                "/vendas/**", "/contabilidade/**", "/adm/**")
+                        .hasRole("ADMIN")
 
-                        // Bloqueia outras requisições
                         .anyRequest().denyAll()
                 )
-
-                // Autenticação via JWT
-                .oauth2ResourceServer(oauth2 ->
-                        oauth2.jwt(jwt ->
-                                jwt.jwtAuthenticationConverter(converter)
-                        )
-                )
-
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt ->
+                        jwt.jwtAuthenticationConverter(converter)))
                 .build();
     }
 }
